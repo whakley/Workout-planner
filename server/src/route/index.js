@@ -65,7 +65,20 @@ app.put('/api/workouts/:id', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+// API route to delete a specific workout by ID from the database
+app.delete('/api/workouts/:id', async (req, res) => {
+  try {
+    const result = await pool.query('DELETE FROM workouts WHERE id = $1 RETURNING *', [req.params.id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Workout not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
 
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
