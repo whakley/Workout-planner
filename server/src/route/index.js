@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const pool = require('../db/db');
 require('dotenv').config();
 
 const app = express();
@@ -12,11 +13,14 @@ app.get('/', (req, res) => {
   res.send('API is running');
 });
 
-app.get('/api/workouts', (req, res) => {
-  res.json([
-    { id: 1, title: 'Leg Day', workout_date: '2026-03-10' },
-    { id: 2, title: 'Push Day', workout_date: '2026-03-12' }
-  ]);
+app.get('/api/workouts', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM workouts ORDER BY id ASC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 app.listen(PORT, () => {
