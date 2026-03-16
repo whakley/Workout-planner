@@ -50,6 +50,22 @@ app.get('/api/workouts/:id', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+// API route to update a specific workout by ID in the database
+app.put('/api/workouts/:id', async (req, res) => {
+  try {
+    const result = await pool.query('UPDATE workouts SET title = $1, workout_date = $2, notes = $3 WHERE id = $4 RETURNING *',
+      [req.body.title, req.body.workout_date, req.body.notes, req.params.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Workout not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
