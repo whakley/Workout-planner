@@ -22,7 +22,18 @@ app.get('/api/workouts', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
-
+app.post('/api/workouts', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'INSERT INTO workouts (user_id, title, workout_date, notes) VALUES ($1, $2, $3, $4) RETURNING *',
+      [req.body.user_id, req.body.title, req.body.workout_date, req.body.notes]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
