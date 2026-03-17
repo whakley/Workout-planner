@@ -81,13 +81,27 @@ app.delete('/api/workouts/:id', async (req, res) => {
   }
 });
 // API route to get all workout entries for a specific workout ID from the database
-app.get('/api/workouts/:id/entries/', async (req, res) => {
+app.get('/api/workouts/:id/entries', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM workout_entries WHERE workout_id = $1 ORDER BY id ASC', [req.params.id]);
     res.json(result.rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
+  }
+});
+// API route to create a new workout entry for a specific workout ID in the database
+app.post('/api/workouts/:id/entries', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'INSERT INTO workout_entries (workout_id, exercise_name, sets, reps, weight) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [req.params.id, req.body.exercise_name, req.body.sets, req.body.reps, req.body.weight]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+
   }
 });
 app.listen(PORT, () => {
