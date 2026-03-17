@@ -3,6 +3,7 @@
 const express = require('express');
 const cors = require('cors');
 const pool = require('../db/db');
+const e = require('express');
 require('dotenv').config();
 
 const app = express();
@@ -79,7 +80,16 @@ app.delete('/api/workouts/:id', async (req, res) => {
 
   }
 });
-
+// API route to get all workout entries for a specific workout ID from the database
+app.get('/api/workouts/:id/entries/', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM workout_entries WHERE workout_id = $1 ORDER BY id ASC', [req.params.id]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
