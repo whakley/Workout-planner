@@ -104,6 +104,23 @@ app.post('/api/workouts/:id/entries', async (req, res) => {
 
   }
 });
+// API route to update a specific workout entry by ID in the database
+app.put('/api/entries/:id', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'UPDATE workout_entries SET exercise_name = $1, sets = $2, reps = $3, weight = $4 WHERE id = $5 RETURNING *',
+      [req.body.exercise_name, req.body.sets, req.body.reps, req.body.weight, req.params.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Workout entry not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
